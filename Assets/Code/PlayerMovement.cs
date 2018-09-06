@@ -7,10 +7,12 @@ public class PlayerMovement : MonoBehaviour {
     private const float LANE_DISTANCE = 3.0f;
     private const float TURN_SPEED = 0.05f;
 
+    private bool isRunning = false;
+
     private CharacterController cc;
     private Animator anim;
 
-    private float jumpForce = 14.0f;
+    private float jumpForce = 6.0f;
     private float gravity = 12.0f;
     private float verticalVelocity;
     private float speed = 7.0f;
@@ -19,20 +21,20 @@ public class PlayerMovement : MonoBehaviour {
     private void Start ()
     {
         cc = GetComponent<CharacterController>();
-        anim = GetComponent<Animator>();
+        anim = GetComponentInChildren<Animator>();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            MoveLane(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            MoveLane(false);
-        }
+        if (!isRunning)
+            return;
 
+        #region Change Lane
+        if (MobileInput.Instance.SwipeRight)
+            MoveLane(true);
+        if (MobileInput.Instance.SwipeLeft)
+            MoveLane(false);
+        
         Vector3 targetPosition = transform.position.z * Vector3.forward;
 
         if (desiredLane == 0)
@@ -44,8 +46,9 @@ public class PlayerMovement : MonoBehaviour {
             targetPosition += Vector3.right * LANE_DISTANCE;
         }
 
-        Vector3 moveVector = Vector3.zero;
+        #endregion
 
+        Vector3 moveVector = Vector3.zero;
         moveVector.x = (targetPosition - transform.position).normalized.x * speed;
 
         bool isGrounded = IsGrounded();
@@ -55,13 +58,18 @@ public class PlayerMovement : MonoBehaviour {
         {
             verticalVelocity = -0.1f;
             
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (MobileInput.Instance.SwipeUp)
             {
                 // Jump
-                Debug.Log("Jump activated");
-
+                
                 anim.SetTrigger("Jump");
                 verticalVelocity = jumpForce;
+            }
+            else if (MobileInput.Instance.SwipeDown)
+            {
+                // Slide
+                StartSliding();
+                Invoke("StopSliding", 1.0f);
             }
         }
         else
@@ -69,9 +77,8 @@ public class PlayerMovement : MonoBehaviour {
             verticalVelocity -= (gravity * Time.deltaTime);
 
             // Fast fall
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (MobileInput.Instance.SwipeDown)
             {
-                Debug.Log("Fast fall activated");
                 verticalVelocity = -jumpForce;
             }
         }
@@ -92,7 +99,7 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
-    private void MoveLane (bool goRight)
+    private void MoveLane(bool goRight)
     {
         desiredLane += (goRight) ? 1 : -1;
         desiredLane = Mathf.Clamp(desiredLane, 0, 2);
@@ -110,5 +117,40 @@ public class PlayerMovement : MonoBehaviour {
         Debug.DrawRay(groundRay.origin, groundRay.direction, Color.cyan, 1.0f);
 
         return Physics.Raycast(groundRay, 0.2f + 0.1f);
+    }
+
+    public void StartRunning()
+    {
+        isRunning = true;
+        anim.SetTrigger("StartRunning");
+    }
+
+    private void StartSliding()
+    {
+        anim.SetBool("Sliding", true);
+        cc.height /= 2;
+        cc.center = new Vector3(cc.center.x, cc.center.y / 2, cc.center.z);
+    }
+
+    private void StopSliding()
+    {
+        anim.SetBool("Sliding", false);
+        cc.height *= 2;
+        cc.center = new Vector3(cc.center.x, cc.center.y * 2, cc.center.z);
+    }
+
+    private void Crash()
+    {
+        anim.SetTrigger("Die");
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        switch (hit.gameObject.tag)
+        {
+            case "Obstacle":
+                Crash();
+                break;
+        }
     }
 }
