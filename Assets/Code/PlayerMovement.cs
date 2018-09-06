@@ -15,19 +15,34 @@ public class PlayerMovement : MonoBehaviour {
     private float jumpForce = 6.0f;
     private float gravity = 12.0f;
     private float verticalVelocity;
-    private float speed = 7.0f;
     private int desiredLane = 1;
+
+    // Speed modifier
+    private float originalSpeed = 7.0f;
+    private float speed;
+    private float speedIncreaseLastTick;
+    private float speedIncreaseTime = 2.5f;
+    private float speedIncreaseAmount = 0.1f;
 
     private void Start ()
     {
         cc = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
+
+        speed = originalSpeed;
     }
 
     private void Update()
     {
         if (!isRunning)
             return;
+
+        if (Time.time - speedIncreaseLastTick > speedIncreaseTime)
+        {
+            speedIncreaseLastTick = Time.time;
+            speed += speedIncreaseAmount;
+            GameManager.Instance.UpdateModifier(speed - originalSpeed);
+        }
 
         #region Change Lane
         if (MobileInput.Instance.SwipeRight)
@@ -54,7 +69,7 @@ public class PlayerMovement : MonoBehaviour {
         bool isGrounded = IsGrounded();
         anim.SetBool("Grounded", isGrounded);
 
-        if (isGrounded) // if grounded
+        if (isGrounded)
         {
             verticalVelocity = -0.1f;
             
