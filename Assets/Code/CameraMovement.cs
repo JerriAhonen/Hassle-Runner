@@ -16,6 +16,6 @@ public class CameraMovement : MonoBehaviour {
     {
         Vector3 targetPosition = lookAt.position + offset;
         targetPosition.x = 0;
-        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * 4.0f);
     }
 }

@@ -6,10 +6,10 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour {
 
     private const int COIN_SCORE_AMOUNT = 5;
-
-
+    
     public static GameManager Instance { set; get; }
 
+    public bool IsDead { set; get; }
     private bool isGameStarted = false;
     private PlayerMovement playerMovement;
 
@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour {
     public Text scoreText, coinText, modifierText;
     private float score, coinscore, modifierScore;
     private int lastScore;
+
+    public GameObject replayButton;
 
     private void Awake()
     {
@@ -27,6 +29,8 @@ public class GameManager : MonoBehaviour {
         scoreText.text = score.ToString("0");
         coinText.text = coinscore.ToString("0");
         modifierText.text = "x" + modifierScore.ToString("0.0");
+
+        replayButton.SetActive(false);
     }
 
     private void Update()
@@ -37,7 +41,7 @@ public class GameManager : MonoBehaviour {
             playerMovement.StartRunning();
         }
 
-        if (isGameStarted)
+        if (isGameStarted && !IsDead)
         {
             // Bump the score up
             score += (Time.deltaTime * modifierScore);
@@ -46,8 +50,12 @@ public class GameManager : MonoBehaviour {
             {
                 scoreText.text = score.ToString("0");
                 lastScore = (int)score;
-            }
-            
+            }   
+        }
+
+        if (IsDead && !replayButton.activeSelf)
+        {
+            replayButton.SetActive(true);
         }
     }
     

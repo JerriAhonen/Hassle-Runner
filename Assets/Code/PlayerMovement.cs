@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
 
-    private const float LANE_DISTANCE = 3.0f;
+    private const float LANE_DISTANCE = 2.5f;
     private const float TURN_SPEED = 0.05f;
 
     private bool isRunning = false;
@@ -157,6 +157,8 @@ public class PlayerMovement : MonoBehaviour {
     private void Crash()
     {
         anim.SetTrigger("Die");
+        isRunning = false;
+        GameManager.Instance.IsDead = true;
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
