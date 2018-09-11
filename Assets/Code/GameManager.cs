@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour {
     private float score, coinscore, modifierScore;
     private int lastScore;
 
-    public GameObject replayButton;
+    public GameObject deathMenu;
 
     private void Awake()
     {
@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour {
         coinText.text = coinscore.ToString("0");
         modifierText.text = "x" + modifierScore.ToString("0.0");
 
-        replayButton.SetActive(false);
+        deathMenu.SetActive(false);
     }
 
     private void Update()
@@ -53,9 +53,9 @@ public class GameManager : MonoBehaviour {
             }   
         }
 
-        if (IsDead && !replayButton.activeSelf)
+        if (IsDead && !deathMenu.activeSelf)
         {
-            replayButton.SetActive(true);
+            deathMenu.SetActive(true);
         }
     }
     
