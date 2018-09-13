@@ -15,10 +15,14 @@ public class GameManager : MonoBehaviour {
 
     // UI and the UI fields
     public Text scoreText, coinText, modifierText;
-    private float score, coinscore, modifierScore;
+    private float score, coinScore, modifierScore;
     private int lastScore;
 
+    // Death menu
     public GameObject deathMenu;
+    public Animator deathMenuAnim;
+    public Text deathMenuScoreText, deathMenuCoinText;
+
 
     private void Awake()
     {
@@ -27,10 +31,10 @@ public class GameManager : MonoBehaviour {
         playerMovement = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
 
         scoreText.text = score.ToString("0");
-        coinText.text = coinscore.ToString("0");
+        coinText.text = coinScore.ToString("0");
         modifierText.text = "x" + modifierScore.ToString("0.0");
 
-        deathMenu.SetActive(false);
+        //deathMenu.SetActive(false);
     }
 
     private void Update()
@@ -39,6 +43,7 @@ public class GameManager : MonoBehaviour {
         {
             isGameStarted = true;
             playerMovement.StartRunning();
+            FindObjectOfType<AsteroidSpawner>().IsScrolling = true;
         }
 
         if (isGameStarted && !IsDead)
@@ -52,11 +57,12 @@ public class GameManager : MonoBehaviour {
                 lastScore = (int)score;
             }   
         }
-
+        /*
         if (IsDead && !deathMenu.activeSelf)
         {
             deathMenu.SetActive(true);
         }
+        */
     }
     
 
@@ -68,8 +74,21 @@ public class GameManager : MonoBehaviour {
 
     public void GetCoin()
     {
-        coinscore++;
-        coinText.text = coinscore.ToString("0");
+        coinScore++;
+        coinText.text = coinScore.ToString("0");
         score += COIN_SCORE_AMOUNT;
+    }
+
+    public void OnDeath()
+    {
+        IsDead = true;
+        deathMenuScoreText.text = "Score: " + score.ToString("0");
+        deathMenuCoinText.text = "Coins: " + coinScore.ToString("0");
+        deathMenuAnim.SetTrigger("Dead");
+    }
+
+    public void OnPlayButton()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
 }
